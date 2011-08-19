@@ -1,0 +1,22 @@
+//
+//  DKPropertyList.m
+//  DiscoKit
+//
+//  Created by Keith Pitt on 12/06/11.
+//  Copyright 2011 Mostly Disco. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface DKPropertyList : NSObject {
+	
+	NSString *_plistPath;
+    NSArray *_properties;
+
+}
+
+- (void)save;
+- (void)loadFromDictionary:(NSMutableDictionary*)dict;
+- (void)saveToDictionary:(NSMutableDictionary*)dict;
+
+@end
