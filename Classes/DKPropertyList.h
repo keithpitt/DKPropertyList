@@ -10,13 +10,13 @@
 
 @interface DKPropertyList : NSObject {
 	
-	NSString *_plistPath;
-    NSArray *_properties;
+	NSString * _plistPath;
+    NSArray * _properties;
 
 }
 
 - (void)save;
-- (void)loadFromDictionary:(NSMutableDictionary*)dict;
-- (void)saveToDictionary:(NSMutableDictionary*)dict;
+- (void)loadFromDictionary:(NSDictionary *)dictionary;
+- (void)saveToDictionary:(NSDictionary *)dictionary;
 
 @end

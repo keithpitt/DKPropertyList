@@ -11,47 +11,62 @@
 
 @implementation DKPropertyList
 
++ (NSString *)fileName {
+
+    return [[self class] description];
+
+}
+
 - (id)init {
 	
 	if ((self = [super init])) {
 
 		// Figure out the ~/Documents folder for the iPhone. We can only write stuff here.
-		NSString *rootPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-		_plistPath = [rootPath stringByAppendingString:@"/UserProperties.plist"];
+		NSString * rootPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        
+        // The file name for the PList
+        NSString * fileName = [[[self class] fileName] stringByAppendingPathExtension:@"plist"];
+        
+        // Construct the path
+		_plistPath = [rootPath stringByAppendingPathComponent:fileName];
         [_plistPath retain];
 		
 		// If the plist doesn't exist, copy the bundled one with app the to ~/Documents
 		// directory (so we can write back to it).
 		if (![[NSFileManager defaultManager] fileExistsAtPath:_plistPath]) {
 			
-			NSString *bundled = [[NSBundle mainBundle] pathForResource:@"UserProperties" ofType:@"plist"];
+			NSString * bundled = [[NSBundle mainBundle] pathForResource:[[self class] fileName] ofType:@"plist"];
             
             // If we have a bundled version?
             if(bundled) {
-                NSLog(@"%@", bundled);
                 
-                NSError *error = nil;
+                // Attempt to copy the file
+                NSError * error = nil;
                 [[NSFileManager defaultManager] copyItemAtPath:bundled toPath: _plistPath error:&error];
                 
-                // TODO: Do something with the error, possibly.
+                // TODO: Handle this error betterer
+                if (error) {
+                    NSLog(@"[DKPropertyList] %@", error);
+                    abort();
+                }
+                
             } else {
                 
                 // Create an empty file
-                NSDictionary *blankDictionary = [NSDictionary dictionary];
-                [blankDictionary writeToFile:_plistPath atomically:YES];
+                [[NSDictionary dictionary] writeToFile:_plistPath atomically:YES];
                 
             }
 			
         }
 		
 		// Extract the data into a dictionary.
-		NSMutableDictionary *temp = [[NSMutableDictionary alloc] initWithContentsOfFile: _plistPath];
+		NSMutableDictionary * temp = [[NSMutableDictionary alloc] initWithContentsOfFile: _plistPath];
         
         // Load the properties of the class into an array
-        NSMutableArray *collection = [NSMutableArray array];
+        NSMutableArray * collection = [NSMutableArray array];
         
         unsigned int outCount, i;
-        objc_property_t *properties = class_copyPropertyList([self class], &outCount);
+        objc_property_t * properties = class_copyPropertyList([self class], &outCount);
         
         for (i = 0; i < outCount; i++) {        
             objc_property_t property = properties[i];
