@@ -15,8 +15,11 @@
 
 }
 
++ (void)setValue:(id)value forProperty:(NSString *)property;
++ (id)valueForProperty:(NSString *)property;
+
 - (void)save;
-- (void)loadFromDictionary:(NSDictionary *)dictionary;
-- (void)saveToDictionary:(NSDictionary *)dictionary;
+- (void)reset;
+- (void)reload;
 
 @end

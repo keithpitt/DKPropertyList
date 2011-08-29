@@ -11,7 +11,24 @@
 
 @implementation DKPropertyList
 
-+ (NSString *)fileName {
++ (void)setValue:(id)value forProperty:(NSString *)property {
+    
+    id propertyList = [[[self class] new] autorelease];
+    
+    [propertyList setValue:value forKey:property];
+    [propertyList save];
+    
+}
+
++ (id)valueForProperty:(NSString *)property {
+    
+    id propertyList = [[[self class] new] autorelease];
+    
+    return [propertyList valueForKey:property];
+    
+}
+
++ (NSString *)propertyListFileName {
 
     return [[self class] description];
 
@@ -25,7 +42,7 @@
 		NSString * rootPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
         
         // The file name for the PList
-        NSString * fileName = [[[self class] fileName] stringByAppendingPathExtension:@"plist"];
+        NSString * fileName = [[[self class] propertyListFileName] stringByAppendingPathExtension:@"plist"];
         
         // Construct the path
 		_plistPath = [rootPath stringByAppendingPathComponent:fileName];
@@ -35,7 +52,7 @@
 		// directory (so we can write back to it).
 		if (![[NSFileManager defaultManager] fileExistsAtPath:_plistPath]) {
 			
-			NSString * bundled = [[NSBundle mainBundle] pathForResource:[[self class] fileName] ofType:@"plist"];
+			NSString * bundled = [[NSBundle mainBundle] pathForResource:[[self class] propertyListFileName] ofType:@"plist"];
             
             // If we have a bundled version?
             if(bundled) {
@@ -59,29 +76,8 @@
 			
         }
 		
-		// Extract the data into a dictionary.
-		NSMutableDictionary * temp = [[NSMutableDictionary alloc] initWithContentsOfFile: _plistPath];
-        
-        // Load the properties of the class into an array
-        NSMutableArray * collection = [NSMutableArray array];
-        
-        unsigned int outCount, i;
-        objc_property_t * properties = class_copyPropertyList([self class], &outCount);
-        
-        for (i = 0; i < outCount; i++) {        
-            objc_property_t property = properties[i];
-            [collection addObject:[NSString stringWithCString:property_getName(property)
-                                                     encoding:NSASCIIStringEncoding]];
-        }
-        
-        _properties = collection;
-        [_properties retain];
-		
-		// Load them into the current class
-        [self loadFromDictionary:temp];
-        
-		[temp release];
-		
+        [self reload];
+				
 	}
 	
 	return self;
@@ -91,11 +87,20 @@
 - (void)save {
 	
 	// Extract the data into a dictionary.
-	NSMutableDictionary *temp = [[NSMutableDictionary alloc] initWithContentsOfFile: _plistPath];
+	NSMutableDictionary * temp = [[NSMutableDictionary alloc] initWithContentsOfFile: _plistPath];
 	
-	[self saveToDictionary:temp];
+	// Re-set it back to the dictionary.
+    for (NSString * property in _properties) {
+        
+        id value = [self valueForKey:property];
+        
+        // If we have a value, save it to the dictionary
+        if (value)
+            [temp setObject:value forKey:property];
+        
+    }
 	
-	// Save that shit.
+	// Save the dictionary to the plist file
 	[temp writeToFile:_plistPath atomically:YES];
 	
 	// Cleanup
@@ -103,30 +108,44 @@
 	
 }
 
-- (void)loadFromDictionary:(NSMutableDictionary*)dict {
+- (void)reset {
     
-    // Load values from the dictionary
-    for (NSString *property in _properties)
-        [self setValue:[dict objectForKey:property] forKey:property];
+    for (NSString * property in _properties)
+        [self setValue:nil forKey:property];
     
 }
 
-- (void)saveToDictionary:(NSMutableDictionary*)dict {
+- (void)reload {
     
-    // Re-set it back to the dictionary.
-    for (NSString *property in _properties) {
-        id value = [self valueForKey:property];
-        if (value)
-            [dict setObject:value forKey:property];
+    [self reset];
+    
+    // Extract the data into a dictionary.
+    NSMutableDictionary * temp = [[NSMutableDictionary alloc] initWithContentsOfFile: _plistPath];
+    
+    // Load the properties of the class into an array
+    NSMutableArray * collection = [NSMutableArray array];
+    
+    unsigned int outCount, i;
+    objc_property_t * properties = class_copyPropertyList([self class], &outCount);
+    
+    for (i = 0; i < outCount; i++) {        
+        objc_property_t property = properties[i];
+        [collection addObject:[NSString stringWithCString:property_getName(property)
+                                                 encoding:NSASCIIStringEncoding]];
     }
+    
+    _properties = collection;
+    [_properties retain];
+    
+    // Load them into the current class
+    for (NSString * property in _properties)
+        [self setValue:[temp objectForKey:property] forKey:property];
+    
+    [temp release];
     
 }
 
 - (void)dealloc {
-
-    // Cleanup
-    for (NSString *property in _properties)
-        [self setValue:nil forKey:property];
     
     [_properties release];
     [_plistPath release];
