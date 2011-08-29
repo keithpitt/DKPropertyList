@@ -1,20 +1,91 @@
 # DKPropertyList
 
-TODO
+`DKPropertyList` is a class that makes it easy to work with [Property List](http://en.wikipedia.org/wiki/Property_list) files in Objective-C.
 
 It is used in the apps written by [Mostly Disco](http://www.mostlydisco.com) and [The Frontier Group](http://www.thefrontiergroup.com.au)
 
 ## Installation
 
-TODO
+Copy `DKPropertyList.h` and `DKPropertyList.m` into to your project folder, and add them to your Xcode project.
 
 ## Usage
 
-### Something
+### Setup
+
+The first step in using `DKPropertyList` is to subclass it. Here is an
+example:
 
 ```objective-c
-// Interesting example
+#import "DKPropertyList.h"
+
+@interface ExamplePropertyList : DKPropertyList
+
+@property (nonatomic, retain) NSString * someProperty;
+
+@end
 ```
+
+Now that we have subclassed it, when we save any of the properties on
+the Property List, they will be written to a file called
+"ExamplePropertyList.plist" in the current users documents directory.
+
+When ever you initialize an instance of `DKPropertyList` it will load
+all the values from the property list. If one does not exist, one will
+be created.
+
+### Accessing Properties
+
+There are 2 ways to access properties of your plist
+
+```objective-c
+ExamplePropertyList * examplePropertyList = [ExamplePropertyList new];
+
+NSString * property = examplePropertyList.someProperty;
+
+NSLog(@"%@", property);
+```
+
+```objective-c
+NSString * property = [ExamplePropertyList valueForProperty:@"someProperty"]
+
+NSLog(@"%@", property);
+```
+
+### Saving Properties
+
+Just like accessing properties, there are also 2 ways to save properties
+
+```objective-c
+ExamplePropertyList * examplePropertyList = [ExamplePropertyList new];
+
+// Set the property
+examplePropertyList.someProperty = @"More energy...";
+
+// Save the property list
+[examplePropertyList save];
+```
+
+```objective-c
+[ExamplePropertyList setValue:@"More energy..." forProperty:@"someProperty"];
+```
+
+### Resetting your Property List
+
+If you want to set all the values in your property list to `nil`
+
+```objective-c
+[examplePropertyList reset];
+[examplePropertyList save];
+```
+
+### Reloading your Property List
+
+If you want to reload your property list from the file system
+
+```objective-c
+[examplePropertyList reload];
+```
+
 ## Running Specs
 
 To run the specs, open [DKPropertyList.xcodeproj](https://github.com/keithpitt/DKPropertyList/tree/master/DKPropertyList.xcodeproj) project, and run the `Specs` target.
