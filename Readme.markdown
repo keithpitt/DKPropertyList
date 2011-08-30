@@ -100,7 +100,6 @@ To run the specs, open [DKPropertyList.xcodeproj](https://github.com/keithpitt/D
 
 * https://github.com/petejkim/expecta
 * https://github.com/pivotal/cedar
-* http://ocmock.org/
 
 ## Note on Patches/Pull Requests
 
