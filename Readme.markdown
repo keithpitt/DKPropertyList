@@ -23,10 +23,16 @@ example:
 @property (nonatomic, retain) NSString * someProperty;
 
 @end
+
+@implementation ExamplePropertyList
+
+@synthesize someProperty;
+
+@end
 ```
 
 Now that we have subclassed it, when we save any of the properties on
-the Property List, they will be written to a file called
+the ExamplePropertyList class, they will be written to a file called
 "ExamplePropertyList.plist" in the current users documents directory.
 
 When ever you initialize an instance of `DKPropertyList` it will load
