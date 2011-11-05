@@ -1,0 +1,14 @@
+Vendor::Spec.new do |s|
+
+  s.name        = "DKPropertyList"
+  s.version     = "0.1"
+
+  s.authors     = "keithpitt"
+  s.email       = "me@keithpitt.com"
+  s.description = "A class that makes it easy to work with PList files in Objective-C"
+
+  s.source      = "https://github.com/keithpitt/DKPropertyList"
+
+  s.files       = `git ls-files Classes`.split("\n")
+
+end
