@@ -16,7 +16,7 @@
     id propertyList = [[[self class] new] autorelease];
     
     [propertyList setValue:value forKey:property];
-    [propertyList save];
+    [(DKPropertyList *)propertyList save];
     
 }
 
